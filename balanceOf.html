@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ERC-20 Balance Checker (Holesky)</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+  <h2>Check ERC-20 Balance (Holesky)</h2>
+  <button id="checkBalance">Check My Token Balance</button>
+  <p id="balance">Balance: N/A</p>
+
+  <script>
+    const tokenAddress = "REPLACE_WITH_YOUR_CONTRACT_ADDRESS"; // 👈 replace this
+    const tokenABI = [
+      "function balanceOf(address account) external view returns (uint256)"
+    ];
+
+    const checkBalanceButton = document.getElementById('checkBalance');
+    const balanceDisplay = document.getElementById('balance');
+
+    checkBalanceButton.addEventListener('click', async () => {
+      try {
+        if (typeof window.ethereum === 'undefined') {
+          alert("MetaMask is not installed!");
+          return;
+        }
+
+        // Request account access
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const userAddress = await signer.getAddress();
+        const network = await provider.getNetwork();
+
+        if (network.chainId !== 17000n) {
+          alert("Please switch MetaMask to the Holesky testnet.");
+          return;
+        }
+
+        // Create contract instance
+        const contract = new ethers.Contract(tokenAddress, tokenABI, provider);
+        const balance = await contract.balanceOf(userAddress);
+
+        // Format result (assuming 18 decimals)
+        const formatted = ethers.formatUnits(balance, 18);
+
+        balanceDisplay.textContent = `Balance: ${formatted}`;
+      } catch (err) {
+        console.error("Error:", err);
+        balanceDisplay.textContent = "Error fetching balance.";
+      }
+    });
+  </script>
+</body>
+</html>
