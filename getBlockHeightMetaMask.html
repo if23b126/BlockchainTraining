@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Holesky Block Height</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+  <h2>Holesky Testnet Block Height</h2>
+  <button id="getBlock">Get Current Block Number</button>
+  <p id="blockNumber">Block: N/A</p>
+
+  <script>
+    const getBlockButton = document.getElementById('getBlock');
+    const blockNumberText = document.getElementById('blockNumber');
+
+    getBlockButton.addEventListener('click', async () => {
+      try {
+        if (typeof window.ethereum === 'undefined') {
+          alert("MetaMask is not installed!");
+          return;
+        }
+
+        // Request account access if needed
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const network = await provider.getNetwork();
+
+        if (network.chainId !== 17000n) { // Holesky chain ID
+          alert("Please switch MetaMask to the Holesky testnet (Chain ID: 17000)");
+          return;
+        }
+
+        const blockNumber = await provider.getBlockNumber();
+        blockNumberText.textContent = `Block: ${blockNumber}`;
+      } catch (error) {
+        console.error("Error fetching block number:", error);
+        blockNumberText.textContent = "Error fetching block number.";
+      }
+    });
+  </script>
+</body>
+</html>
